@@ -233,7 +233,7 @@ public class Principal extends JFrame {
 				}
 			}
 		});
-		
+
 		/**
 		 * Evento para mostrar por dias
 		 */
@@ -248,7 +248,6 @@ public class Principal extends JFrame {
 				}
 			}
 		});
-		
 
 		/**
 		 * Nos pregunta si queremos guardar al cerrar la ventana si se han
@@ -383,7 +382,7 @@ public class Principal extends JFrame {
 				ayuda.setVisible(true);
 			}
 		});
-		
+
 		/**
 		 * Abre el diálogo para mostrar por escenario
 		 */
@@ -398,14 +397,15 @@ public class Principal extends JFrame {
 				}
 			}
 		});
-		
+
 	}
 
 	/**
 	 * Abre un fichero
 	 */
 	private void abrir() {
-		if (isModificacion()) {
+		if (askOpen()) {
+			fileChooser.setSelectedFile(null);
 			if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 				try {
 					Gestion.abrir(fileChooser.getSelectedFile().getAbsolutePath());
@@ -448,13 +448,13 @@ public class Principal extends JFrame {
 
 		if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
-			if (!file.exists() || comprobarExistencia(file)) {
+			if (!file.exists() || testExists(file)) {
 				try {
 					Gestion.guardar(fileChooser.getSelectedFile().getAbsolutePath());
-					setTitle(Gestion.getNombre());
+					setTitle(file.getName() + " - Resurrection Fest");
 				} catch (FileNotFoundException e) {
 					JOptionPane.showMessageDialog(null, "Error al guardar", "Error", JOptionPane.INFORMATION_MESSAGE);
-				} catch (IOException e) {
+				} catch (IOException e) { 
 					JOptionPane.showMessageDialog(null, "Error al guardar", "Error", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
@@ -467,13 +467,10 @@ public class Principal extends JFrame {
 	 * @param file
 	 * @return boolean
 	 */
-	private boolean comprobarExistencia(File file) {
+	private boolean testExists(File file) {
 		if (file.exists()) {
-			int sobreescribir = JOptionPane.showConfirmDialog(null, "Ya existe ese archivo. ¿Desea sobreescribir?",
-					"Sobreescribir", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
-			if (sobreescribir == JOptionPane.YES_OPTION) {
-				return true;
-			}
+			return (JOptionPane.showConfirmDialog(null, "Ya existe ese archivo. ¿Desea sobreescribir?", "Sobreescribir",
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION);
 		}
 		return false;
 	}
@@ -483,10 +480,8 @@ public class Principal extends JFrame {
 	 */
 	protected void nuevo() {
 		if (Gestion.isModificado()) {
-			int opcion = JOptionPane.showConfirmDialog(null,
-					"Has hecho cambios... ¿seguro que quieres abrir un nuevo fichero?", "Festival modificado",
-					JOptionPane.YES_NO_OPTION);
-			if (opcion == JOptionPane.YES_OPTION) {
+			if (JOptionPane.showConfirmDialog(null, "Has hecho cambios... ¿seguro que quieres abrir un nuevo fichero?",
+					"Festival modificado", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				Gestion.festival = new Festival();
 				setTitle("Sin título - Resurrection Fest");
 			}
@@ -501,18 +496,11 @@ public class Principal extends JFrame {
 	 * 
 	 * @return boolean
 	 */
-	private boolean isModificacion() {
-		if (Gestion.isModificado()) {
-			int opcion = JOptionPane.showConfirmDialog(null,
-					"Has hecho cambios... ¿seguro que quieres abrir un nuevo fichero?", "Festival modificado",
-					JOptionPane.YES_NO_OPTION);
-			if (opcion == JOptionPane.YES_OPTION)
-				return true;
-			else
-				return false;
-		}
-		return true;
-
+	private boolean askOpen() {
+		if (!Gestion.isModificado())
+			return true;
+		return (JOptionPane.showConfirmDialog(null, "Has hecho cambios... ¿seguro que quieres abrir un nuevo fichero?",
+				"Festival modificado", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION);
 	}
 
 	/**
@@ -630,7 +618,7 @@ public class Principal extends JFrame {
 		menuMostrar.add(mntmPorEscenarios);
 
 		mntmPorDias = new JMenuItem("Por dias");
-	mntmPorDias.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
+		mntmPorDias.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
 		menuMostrar.add(mntmPorDias);
 
 		mnAcercaDe = new JMenu("Ayuda");

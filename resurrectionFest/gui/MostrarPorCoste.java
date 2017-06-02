@@ -21,7 +21,7 @@ public class MostrarPorCoste extends MostrarFestival {
 	public MostrarPorCoste() {
 		setTitle("Mostrar ordenado por coste");
 		itGroups = Gestion.iteratorCoste();
-		nextGroup();
+	renovarDatos();
 		btnAnterior.setEnabled(false);
 	}
 

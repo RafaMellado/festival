@@ -1,14 +1,45 @@
 package resurrectionFest.funcionalidad.clasesPrincipales.festival;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.regex.Pattern;
+
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaNoValidaException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaPosteriorException;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FormatoHoraNoValidoException;
 
-public class Fecha {
+public class Fecha implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	/**
+	 * locale
+	 */
+	private static Locale es = Locale.getDefault();
+	/**
+	 * Fecha Inicio
+	 */
+	private LocalDate fechaInicio = LocalDate.now();
+	/**
+	 * Fecha final
+	 */
+	private LocalDate fechaFinal = LocalDate.now();
+
+	/**
+	 * Patrón para comprobar que la hora introducida sea válida
+	 */
+	private static final Pattern PATRON_HORA = Pattern.compile("2[0-3]\\:[0-5]\\d|1\\d\\:[0-5]\\d|0\\d\\:[0-5]\\d");
 
 	/**
 	 * Comprueba la fecha del festival
@@ -18,13 +49,12 @@ public class Fecha {
 	 * @throws FechaNoValidaException
 	 * @throws FechaPosteriorException
 	 */
-	static boolean testFechaInicio(String fecha)
-			throws FechaNoValidaException, FechaPosteriorException {
+	boolean testFechaInicio(int dia, int mes, int anno) throws FechaNoValidaException, FechaPosteriorException {
 		try {
+			String fecha = "" + anno + "-" + String.format("%02d", mes) + "-" + String.format("%02d", dia);
 			LocalDate fechaFestival = LocalDate.parse(fecha);
-			if (LocalDate.now().isAfter(fechaFestival) )
+			if (LocalDate.now().isAfter(fechaFestival))
 				throw new FechaPosteriorException("La fecha introducida ya ha pasado");
-
 		} catch (DateTimeParseException e) {
 			throw new FechaNoValidaException("El formato no es válido (dd-mm-yyyy)");
 		}
@@ -39,68 +69,46 @@ public class Fecha {
 	 * @throws FechaNoValidaException
 	 * @throws FechaPosteriorException
 	 */
-	static boolean testFechaFinal(String fecha, LocalDate fechaInicio)
-			throws FechaNoValidaException, FechaPosteriorException {
+	boolean testFechaFinal(int dia, int mes, int anno) throws FechaNoValidaException, FechaPosteriorException {
 		try {
+			String fecha = "" + anno + "-" + String.format("%02d", mes) + "-" + String.format("%02d", dia);
 			LocalDate fechaFestival = LocalDate.parse(fecha);
-			if (LocalDate.now().isAfter(fechaFestival) || fechaInicio.isAfter(fechaFestival) )
+			if (LocalDate.now().isAfter(fechaFestival) || fechaInicio.isAfter(fechaFestival))
 				throw new FechaPosteriorException("La fecha introducida es anterior a la fecha de inicio del festival");
-
 		} catch (DateTimeParseException e) {
 			throw new FechaNoValidaException("El formato no es válido (dd-mm-yyyy)");
 		}
 		return true;
 	}
 
-	static long getDiasRestantes(LocalDate fechaInicio) {
-		return ChronoUnit.DAYS.between(LocalDate.now(), fechaInicio);
+	/**
+	 * Devuelve los días restantes para el inicio del festival
+	 * 
+	 * @param fechaInicio
+	 * @return long
+	 */
+	long getDiasRestantes() {
+		return ChronoUnit.DAYS.between(LocalDate.now(), getFechaInicio());
 	}
 
-	static String getFechaEspanola(LocalDate fecha) {
+	/**
+	 * Devuelve la fecha en español
+	 * 
+	 * @param fecha
+	 * @return
+	 */
+	String getFechaEspanola(LocalDate fecha) {
 		return fecha.getDayOfMonth() + "/" + getMesCastellano(fecha) + "/" + fecha.getYear();
 	}
 
+	/**
+	 * Devuelve el mes en castellano
+	 * 
+	 * @param fecha
+	 * @return cadena
+	 */
 	public static String getMesCastellano(LocalDate fecha) {
-		String mes = "";
-		switch (fecha.getMonth().getValue()) {
-		case 1:
-			mes = "Enero";
-			break;
-		case 2:
-			mes = "Febrero";
-			break;
-		case 3:
-			mes = "Marzo";
-			break;
-		case 4:
-			mes = "Abril";
-			break;
-		case 5:
-			mes = "Mayo";
-			break;
-		case 6:
-			mes = "Junio";
-			break;
-		case 7:
-			mes = "Julio";
-			break;
-		case 8:
-			mes = "Agosto";
-			break;
-		case 9:
-			mes = "Septiembre";
-			break;
-		case 10:
-			mes = "Octubre";
-			break;
-		case 11:
-			mes = "Noviembre";
-			break;
-		default:
-			mes = "Diciembre";
-			break;
-		}
-		return mes;
+		return fecha.getMonth().getDisplayName(TextStyle.FULL, es);
 	}
 
 	/**
@@ -109,53 +117,58 @@ public class Fecha {
 	 * @return meses
 	 */
 	public static String[] getMeses() {
-		String[] meses = new String[12];
+		String[] meses = new String[Month.values().length];
 		for (int i = 0; i < meses.length; i++) {
 			switch (i) {
-			case 0:
-				meses[i] = "Enero";
-				break;
-			case 1:
-				meses[i] = "Febrero";
-				break;
-			case 2:
-				meses[i] = "Marzo";
-				break;
-			case 3:
-				meses[i] = "Abril";
-				break;
-			case 4:
-				meses[i] = "Mayo";
-				break;
-			case 5:
-				meses[i] = "Junio";
-				break;
-			case 6:
-				meses[i] = "Julio";
-				break;
-			case 7:
-				meses[i] = "Agosto";
-				break;
-			case 8:
-				meses[i] = "Septiembre";
-				break;
-			case 9:
-				meses[i] = "Octubre";
-				break;
-			case 10:
-				meses[i] = "Noviembre";
-				break;
 			default:
-				meses[i] = "Diciembre";
-				break;
+				meses[i] = Month.values()[i].getDisplayName(TextStyle.FULL, es);
 			}
 		}
 		return meses;
 	}
-
 	
 	/**
+	 * Devuelve las fechas disponibles
+	 * @return fechas
+	 */
+	LocalDate[] getFechas() {
+		ArrayList<LocalDate> arrayList = new ArrayList<LocalDate>();
+		LocalDate fechaStart = getFechaInicio();
+		LocalDate fechaEnd = getFechaFinal();
+		int i = 0;
+		arrayList.add(fechaStart);
+		while (fechaStart.plusDays(i++).compareTo(fechaEnd) != 0) {
+			arrayList.add(fechaStart.plusDays(i));
+		}
+		LocalDate[] array = new LocalDate[arrayList.size()];
+		int j = 0;
+		for (LocalDate localDate : arrayList) {
+			array[j++] = localDate;
+		}
+
+		return array;
+	}
+	
+	/**
+	 * Devuelve las fechas disponibles en formato string
+	 * @return array de cadenas
+	 */
+	String[] getFechasString() {
+		
+		String[] fechas = new String[getFechas().length];
+		int i = 0;
+		for (LocalDate fecha : getFechas()) {
+			fechas[i++] = fecha.format(formatoEspanol());
+		}
+		return fechas;
+	}
+
+	public static DateTimeFormatter formatoEspanol(){
+		return DateTimeFormatter.ofPattern("EEEE , dd MMMM yyyy", es);
+	}
+	/**
 	 * Devuelve los proximo 50 años partiendo del actual
+	 * 
 	 * @return años
 	 */
 	public static Integer[] getAnnos() {
@@ -168,25 +181,26 @@ public class Fecha {
 		for (Integer integer : annos) {
 			anyos[i++] = integer;
 		}
-
 		return anyos;
 	}
 
 	/**
 	 * Devuelve los días del mes en funcion del año y mes que sea
+	 * 
 	 * @param mes
 	 * @param anno
 	 * @return dias
 	 */
 	public static Integer[] getDias(Month mes, int anno) {
 		ArrayList<Integer> dias = new ArrayList<Integer>();
-		if (comprobarBisiesto(anno)) {
+		GregorianCalendar a = new GregorianCalendar();
+		if (a.isLeapYear(anno)) {
 			for (int i = 0; i < mes.maxLength(); i++) {
-				dias.add((i+1));
+				dias.add((i + 1));
 			}
 		} else {
-			for (int i = 0; i < mes.maxLength()-1; i++) {
-				dias.add((i+1));
+			for (int i = 0; i < mes.maxLength() - 1; i++) {
+				dias.add((i + 1));
 			}
 		}
 		Integer[] dia = new Integer[dias.size()];
@@ -197,15 +211,64 @@ public class Fecha {
 		return dia;
 	}
 
+
 	/**
-	 * Comprueba si es bisiesto
-	 * @param anno
-	 * @return boolean
+	 * Convierte una localDate a Date
+	 * @param fecha
+	 * @param hora
+	 * @return Date
+	 * @throws FormatoHoraNoValidoException
 	 */
-	private static boolean comprobarBisiesto(int anno) {
-		if ((anno % 4 == 0) && ((anno % 100 != 0) || (anno % 400 == 0)))
-			return true;
-		return false;
+	@SuppressWarnings("deprecation")
+	static Date localDateHourToDate(LocalDate fecha, String hora) throws FormatoHoraNoValidoException {
+		if (!comprobarHora(hora))
+			throw new FormatoHoraNoValidoException("El formato de la hora no es correcto (hh:mm)");
+		return new Date(fecha.getYear()-1900, fecha.getMonthValue()-1, fecha.getDayOfMonth(),
+				Integer.valueOf(hora.substring(0, 2)), Integer.valueOf(hora.substring(3, 5)));
+		
 	}
 
+	/**
+	 * Asigna una nueva fecha de inicio de festival
+	 * @param dia
+	 * @param mes
+	 * @param anno
+	 * @throws FechaNoValidaException
+	 * @throws FechaPosteriorException
+	 */
+	void setFechaInicio(int dia, int mes, int anno) throws FechaNoValidaException, FechaPosteriorException {
+		if (testFechaInicio(dia, mes, anno))
+			fechaInicio = LocalDate.of(anno, mes, dia);
+	}
+	
+	/**
+	 * Asigna una nueva fecha de final de festival
+	 * @param dia
+	 * @param mes
+	 * @param anno
+	 * @throws FechaNoValidaException
+	 * @throws FechaPosteriorException
+	 */
+	void setFechaFinal(int dia, int mes, int anno) throws FechaNoValidaException, FechaPosteriorException {
+		if (testFechaFinal(dia, mes, anno))
+			fechaFinal = LocalDate.of(anno, mes, dia);
+	}
+
+	/**
+	 * Comprueba la hora
+	 * 
+	 * @param hora
+	 * @return boolean
+	 */
+	public static boolean comprobarHora(String hora) {
+		return PATRON_HORA.matcher(hora).matches();
+	}
+
+	LocalDate getFechaFinal() {
+		return fechaFinal;
+	}
+
+	LocalDate getFechaInicio() {
+		return fechaInicio;
+	}
 }

@@ -15,16 +15,17 @@ import javax.swing.JRadioButton;
 import javax.swing.ButtonGroup;
 
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Componentes;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.Fecha;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Gestion;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Grupo;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Miembros;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.ComponentesVacioException;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.EscenarioHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FormatoHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.GrupoYaExisteException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.MiembroYaExisteException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreGrupoNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreMiembroNoValidoException;
-import resurrectionFest.funcionalidad.enumeraciones.Dias;
 import resurrectionFest.funcionalidad.enumeraciones.Escenarios;
 import resurrectionFest.funcionalidad.enumeraciones.Estilo;
 import javax.swing.JButton;
@@ -47,7 +48,6 @@ import java.awt.event.FocusEvent;
  *
  */
 public class AnnadirGrupo extends JDialog {
-
 	/**
 	 * Serial
 	 */
@@ -153,10 +153,6 @@ public class AnnadirGrupo extends JDialog {
 	 */
 	private JComboBox<Procedencia> boxProcedencia;
 	/**
-	 * ComoBox para seleccionar el día de actuación del grupo
-	 */
-	private JComboBox<Dias> boxDia;
-	/**
 	 * Botón para añadir el grupo
 	 */
 	private JButton btnAdd;
@@ -200,11 +196,15 @@ public class AnnadirGrupo extends JDialog {
 	 * Comprueba si el miembro está microfoneado
 	 */
 	private JCheckBox checkMicrofoneado;
+	private JCheckBox chckbxPedalAtenuador;
+	private JComboBox<String> boxDia;
+	private JComboBox<String> boxDuracion;
 
 	/**
 	 * Create the Dialog.
 	 */
 	public AnnadirGrupo() {
+		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(AnnadirGrupo.class.getResource("/resurrectionFest/imagenes/logo.png")));
 		configuracion();
@@ -231,7 +231,7 @@ public class AnnadirGrupo extends JDialog {
 					nameComponente.setForeground(Color.BLACK);
 			}
 		});
-		
+
 		/**
 		 * Evento para comprobar el nombre del grupo
 		 */
@@ -246,22 +246,21 @@ public class AnnadirGrupo extends JDialog {
 					fieldName.setForeground(Color.BLACK);
 			}
 		});
-		
+
 		/**
 		 * Evento para comprobar la hora válida
 		 */
 		fieldHora.addFocusListener(new FocusAdapter() {
 			@Override
-				public void focusLost(FocusEvent e) {
-					if (!Grupo.comprobarHora(fieldHora.getText()))
-						fieldHora.setForeground(Color.RED);
-					else
-						fieldHora.setForeground(Color.BLACK);
-					if (fieldHora.getText() == "")
-						fieldHora.setForeground(Color.BLACK);
-				}
+			public void focusLost(FocusEvent e) {
+				if (!Fecha.comprobarHora(fieldHora.getText()))
+					fieldHora.setForeground(Color.RED);
+				else
+					fieldHora.setForeground(Color.BLACK);
+				if (fieldHora.getText() == "")
+					fieldHora.setForeground(Color.BLACK);
+			}
 		});
-		
 
 		/**
 		 * Evento del comboBox del tipo de miembro
@@ -280,7 +279,8 @@ public class AnnadirGrupo extends JDialog {
 				try {
 					Gestion.addGrupo((Estilo) boxEstilo.getSelectedItem(), fieldName.getText(),
 							(Procedencia) boxProcedencia.getSelectedItem(), getEscenario(),
-							(Dias) boxDia.getSelectedItem(), fieldHora.getText(), Gestion.componentes);
+							Gestion.getFechaGrupo(Gestion.getFechas()[boxDia.getSelectedIndex()], fieldHora.getText()),
+							Gestion.componentes, getDuracion());
 					limpiarCampos();
 				} catch (NombreGrupoNoValidoException e1) {
 					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error al añadir nombre",
@@ -293,6 +293,9 @@ public class AnnadirGrupo extends JDialog {
 							JOptionPane.ERROR_MESSAGE);
 				} catch (ComponentesVacioException e1) {
 					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error al añadir componentes",
+							JOptionPane.ERROR_MESSAGE);
+				} catch (EscenarioHoraNoValidoException e1) {
+					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error en tramo horario",
 							JOptionPane.ERROR_MESSAGE);
 				}
 			}
@@ -317,6 +320,7 @@ public class AnnadirGrupo extends JDialog {
 
 						Gestion.addCantante(nameComponente.getText(), (Procedencia) boxProcedencia.getSelectedItem(),
 								checkInalambrico.isSelected(), (TipoMicrofono) boxMicrofono.getSelectedItem());
+						nameComponente.setText("");
 					} else if (tipoMiembroBox.getSelectedItem().equals("Bateria")) {
 						Gestion.addBateria(nameComponente.getText(), (Procedencia) boxProcedencia.getSelectedItem(),
 								(Integer) bombosSpin.getValue(), (Integer) platosSpin.getValue(),
@@ -326,7 +330,9 @@ public class AnnadirGrupo extends JDialog {
 								checkInalambrico.isSelected(), checkMicrofoneado.isSelected());
 					} else
 						Gestion.addBajista(nameComponente.getText(), (Procedencia) boxProcedencia.getSelectedItem(),
-								checkInalambrico.isSelected(), checkMicrofoneado.isSelected());
+								checkInalambrico.isSelected(), checkMicrofoneado.isSelected(),
+								chckbxPedalAtenuador.isSelected());
+					limpiarCamposComponentes();
 				} catch (NombreMiembroNoValidoException e) {
 					JOptionPane.showMessageDialog(null, e.getMessage(), "Error en nombre", JOptionPane.ERROR_MESSAGE);
 				} catch (MiembroYaExisteException e) {
@@ -354,8 +360,6 @@ public class AnnadirGrupo extends JDialog {
 	 * Oculta los campos de los componentes
 	 */
 	private void ocultar() {
-		btnAadirComponente.setVisible(false);
-		btnAadirComponente.setEnabled(false);
 		platosSpin.setVisible(false);
 		bombosSpin.setVisible(false);
 		lblBombos.setVisible(false);
@@ -374,6 +378,8 @@ public class AnnadirGrupo extends JDialog {
 		checkInalambrico.setVisible(false);
 		checkMicrofoneado.setEnabled(false);
 		checkMicrofoneado.setVisible(false);
+		chckbxPedalAtenuador.setEnabled(false);
+		chckbxPedalAtenuador.setVisible(false);
 	}
 
 	/**
@@ -398,12 +404,11 @@ public class AnnadirGrupo extends JDialog {
 		Gestion.componentes = new Componentes();
 		fieldName.setText("");
 		fieldHora.setText("");
-		boxDia.setSelectedItem(Dias.values()[0]);
+		boxDia.setSelectedItem(Gestion.getFechas()[0]);
 		boxEstilo.setSelectedItem(Estilo.values()[0]);
 		boxProcedencia.setSelectedItem(Procedencia.values()[0]);
 		mainButton.setSelected(true);
 		nameComponente.setText("");
-		ocultar();
 	}
 
 	/**
@@ -415,6 +420,23 @@ public class AnnadirGrupo extends JDialog {
 		return Gestion.componentes;
 	}
 
+	private void limpiarCamposComponentes() {
+		tipoMiembroBox.setSelectedItem("Bateria");
+		checkInalambrico.setSelected(false);
+		checkMicrofoneado.setSelected(false);
+		checkSampleado.setSelected(false);
+		chckbxPedalAtenuador.setSelected(false);
+		bombosSpin.setValue(0);
+		platosSpin.setValue(0);
+		boxMicrofono.setSelectedIndex(0);
+		nameComponente.setText("");
+		boxProcComp.setSelectedIndex(0);
+
+	}
+
+	/**
+	 * Actualiza los campos de componentes en funcion del combobox
+	 */
 	private void actualizarCamposComponentes() {
 		if (tipoMiembroBox.getSelectedItem().equals("Bateria")) {
 			ocultar();
@@ -426,8 +448,6 @@ public class AnnadirGrupo extends JDialog {
 			lblPlatos.setEnabled(true);
 			platosSpin.setEnabled(true);
 			bombosSpin.setEnabled(true);
-			btnAadirComponente.setVisible(true);
-			btnAadirComponente.setEnabled(true);
 			checkSampleado.setEnabled(true);
 			checkSampleado.setVisible(true);
 		} else if (tipoMiembroBox.getSelectedItem().equals("Cantante")) {
@@ -436,18 +456,22 @@ public class AnnadirGrupo extends JDialog {
 			lblTipoMicrofono.setEnabled(true);
 			boxMicrofono.setVisible(true);
 			boxMicrofono.setEnabled(true);
-			btnAadirComponente.setVisible(true);
-			btnAadirComponente.setEnabled(true);
 			checkInalambrico.setEnabled(true);
 			checkInalambrico.setVisible(true);
+		} else if (tipoMiembroBox.getSelectedItem().equals("Guitarrista")) {
+			ocultar();
+			checkInalambrico.setEnabled(true);
+			checkInalambrico.setVisible(true);
+			checkMicrofoneado.setEnabled(true);
+			checkMicrofoneado.setVisible(true);
 		} else {
 			ocultar();
 			checkInalambrico.setEnabled(true);
 			checkInalambrico.setVisible(true);
 			checkMicrofoneado.setEnabled(true);
 			checkMicrofoneado.setVisible(true);
-			btnAadirComponente.setVisible(true);
-			btnAadirComponente.setEnabled(true);
+			chckbxPedalAtenuador.setEnabled(true);
+			chckbxPedalAtenuador.setVisible(true);
 		}
 	}
 
@@ -516,21 +540,16 @@ public class AnnadirGrupo extends JDialog {
 		lblDia.setBounds(55, 132, 38, 14);
 		contentPane.add(lblDia);
 
-		boxDia = new JComboBox<Dias>();
-		boxDia.setModel(new DefaultComboBoxModel<Dias>(Dias.values()));
-		boxDia.setBounds(86, 128, 86, 22);
-		contentPane.add(boxDia);
-
 		lblHora = new JLabel("Hora");
 		lblHora.setBounds(250, 41, 46, 14);
 		contentPane.add(lblHora);
 
 		btnAdd = new JButton("A\u00F1adir");
-		btnAdd.setBounds(101, 245, 91, 23);
+		btnAdd.setBounds(101, 260, 91, 23);
 		contentPane.add(btnAdd);
 
 		btnCancelar = new JButton("Salir");
-		btnCancelar.setBounds(248, 245, 91, 23);
+		btnCancelar.setBounds(248, 260, 91, 23);
 		contentPane.add(btnCancelar);
 
 		fieldHora = new JTextField();
@@ -611,8 +630,6 @@ public class AnnadirGrupo extends JDialog {
 		contentPane.add(bombosSpin);
 
 		btnAadirComponente = new JButton("A\u00F1adir Componente");
-		btnAadirComponente.setEnabled(false);
-		btnAadirComponente.setVisible(false);
 		btnAadirComponente.setBounds(468, 245, 170, 23);
 		contentPane.add(btnAadirComponente);
 
@@ -646,5 +663,32 @@ public class AnnadirGrupo extends JDialog {
 		checkMicrofoneado.setBounds(422, 212, 110, 23);
 		checkMicrofoneado.setBackground(new Color(102, 204, 153));
 		contentPane.add(checkMicrofoneado);
+
+		chckbxPedalAtenuador = new JCheckBox("Pedal atenuador");
+		chckbxPedalAtenuador.setEnabled(false);
+		chckbxPedalAtenuador.setBounds(457, 172, 134, 23);
+		chckbxPedalAtenuador.setBackground(new Color(102, 204, 153));
+		contentPane.add(chckbxPedalAtenuador);
+
+		boxDia = new JComboBox<String>();
+		boxDia.setModel(new DefaultComboBoxModel<String>(Gestion.getFechasString()));
+		boxDia.setSelectedItem(Gestion.getFechasString()[0]);
+		boxDia.setBounds(88, 127, 171, 22);
+		contentPane.add(boxDia);
+
+		boxDuracion = new JComboBox<String>();
+		boxDuracion.setModel(new DefaultComboBoxModel<String>(new String[] { "30 minutos", "45 minutos", "1 hora",
+				"1h y 15 minutos", "1h y 30 minutos", "1h y 45 minutos", "2 horas" }));
+		boxDuracion.setBounds(86, 212, 86, 22);
+		contentPane.add(boxDuracion);
+
+		JLabel lblDuracin = new JLabel("Duraci\u00F3n");
+		lblDuracin.setBounds(30, 216, 55, 14);
+		contentPane.add(lblDuracin);
+		actualizarCamposComponentes();
+	}
+
+	private int getDuracion() {
+		return 30 + (15 * (boxDuracion.getSelectedIndex()));
 	}
 }

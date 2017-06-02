@@ -1,6 +1,9 @@
 package resurrectionFest.funcionalidad.clasesPrincipales.festival;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.ListIterator;
 import java.util.regex.Pattern;
 
@@ -9,7 +12,7 @@ import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.Err
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FormatoHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreGrupoNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreMiembroNoValidoException;
-import resurrectionFest.funcionalidad.enumeraciones.Dias;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NumeroComponentesNoValidoException;
 import resurrectionFest.funcionalidad.enumeraciones.Escenarios;
 import resurrectionFest.funcionalidad.enumeraciones.Estilo;
 import resurrectionFest.funcionalidad.enumeraciones.Procedencia;
@@ -44,14 +47,9 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 	private Escenarios escenario;
 
 	/**
-	 * Día en el que actuará el grupo
+	 * Fecha
 	 */
-	private Dias dia;
-
-	/**
-	 * Hora a la que actuará el grupo
-	 */
-	private String hora;
+	private Date date;
 
 	/**
 	 * Estilo de música del grupo
@@ -64,14 +62,13 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 	private Componentes componentes;
 
 	/**
+	 * Tiempo que tocará el grupo en el festival
+	 */
+	private int duracion;
+	/**
 	 * Patrón para comprobar que el nombre sea de al menos 2 caracteres
 	 */
 	private static final Pattern PATRON_NAME = Pattern.compile(".{2,}");
-
-	/**
-	 * Patrón para comprobar que la hora introducida sea válida
-	 */
-	private static final Pattern PATRON_HORA = Pattern.compile("2[0-3]\\:[0-5]\\d|1\\d\\:[0-5]\\d|0?\\d\\:[0-5]\\d");
 
 	/**
 	 * Método para añadir grupo
@@ -87,16 +84,16 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 	 * @throws FormatoHoraNoValidoException
 	 * @throws ComponentesVacioException
 	 */
-	public Grupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Dias dia, String hora,
-			Componentes componentes)
-					throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
+	public Grupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Date date,
+			Componentes componentes, int duracion)
+			throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
 		setEstilo(estilo);
 		setNombre(nombre);
 		setProcedencia(procedencia);
 		setEscenario(escenario);
-		setDia(dia);
-		setHora(hora);
+		setDate(date);
 		setComponentes(componentes);
+		setDuracion(duracion);
 	}
 
 	/**
@@ -122,18 +119,6 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 	}
 
 	/**
-	 * Comprueba si la hora introducida es válida. Si lo es, la asigna.
-	 * 
-	 * @param hora
-	 * @throws FormatoHoraNoValidoException
-	 */
-	private void setHora(String hora) throws FormatoHoraNoValidoException {
-		if (!comprobarHora(hora))
-			throw new FormatoHoraNoValidoException("El formato de la hora no es correcto (hh:mm)");
-		this.hora = hora;
-	}
-
-	/**
 	 * Comprueba si los componentes introducidos tienen, al menos, un miembro.
 	 * Si lo tiene, lo asigna
 	 * 
@@ -152,9 +137,16 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 	 * @param nombre
 	 * @throws NombreMiembroNoValidoException
 	 * @throws ErrorAlEliminarException
+	 * @throws NumeroComponentesNoValidoException 
 	 */
-	public void borrarComponente(String nombre) throws NombreMiembroNoValidoException, ErrorAlEliminarException {
+	public void borrarComponente(String nombre) throws NombreMiembroNoValidoException, ErrorAlEliminarException, NumeroComponentesNoValidoException {
+		if(getSizeComponentes()==1)
+			throw new NumeroComponentesNoValidoException("El número de componentes no puede ser menor a 1");
 		componentes.removeComponente(nombre);
+	}
+	
+	public void modificarComponente(String nombre, Procedencia procedencia) throws NombreMiembroNoValidoException{
+		componentes.modificarComponente(nombre, procedencia);
 	}
 
 	/**
@@ -186,28 +178,58 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 
 	/**
 	 * Devuelve el numero de componentes del arraylist
+	 * 
 	 * @return size
 	 */
 	public int getSizeComponentes() {
 		return componentes.size();
 	}
-	
+
 	/**
 	 * Comprueba el nombre
+	 * 
 	 * @param nombre
 	 * @return boolean
 	 */
-	public static boolean comprobarNombre(String nombre){
+	public static boolean comprobarNombre(String nombre) {
 		return PATRON_NAME.matcher(nombre).matches();
 	}
-	
+
 	/**
-	 * Comprueba la hora
-	 * @param hora
-	 * @return boolean
+	 * Devuelve el día completo de actuación
+	 * 
+	 * @return cadena
 	 */
-	public static boolean comprobarHora(String hora){
-		return PATRON_HORA.matcher(hora).matches();
+	public String getDia() {
+		LocalDate localDate = getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		return localDate.format(Fecha.formatoEspanol());
+	}
+
+	/**
+	 * Devuelve la hora de actuación
+	 * 
+	 * @return cadena
+	 */
+	@SuppressWarnings("deprecation")
+	public String getHora() {
+		return String.format("%02d", getDate().getHours()) + ":" + String.format("%02d", getDate().getMinutes());
+	}
+
+	public String getDuracionString() {
+		if (getDuracion() < 60)
+			return getDuracion() + " minutos";
+		if(getDuracion()%60 == 0)
+			return getDuracion()/60+ " horas";
+		return getDuracion()/60+ "h"+ getDuracion()%60+ "m";
+		
+	}
+
+	public Procedencia getProcedencia() {
+		return procedencia;
+	}
+
+	private void setProcedencia(Procedencia procedencia) {
+		this.procedencia = procedencia;
 	}
 
 	public String getNombre() {
@@ -220,26 +242,6 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 
 	private void setEscenario(Escenarios escenario) {
 		this.escenario = escenario;
-	}
-
-	public Dias getDia() {
-		return dia;
-	}
-
-	private void setDia(Dias dia) {
-		this.dia = dia;
-	}
-
-	public String getHora() {
-		return hora;
-	}
-
-	public Procedencia getProcedencia() {
-		return procedencia;
-	}
-
-	private void setProcedencia(Procedencia procedencia) {
-		this.procedencia = procedencia;
 	}
 
 	public Estilo getEstilo() {
@@ -286,7 +288,28 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 		if (this.getCosteGrupo() < o.getCosteGrupo())
 			return -1;
 		return 0;
+	}
 
+	public Date getDate() {
+		return date;
+	}
+
+	private void setDate(Date date) {
+		this.date = date;
+	}
+
+	@Override
+	public String toString() {
+		return "Grupo [nombre=" + nombre + ", procedencia=" + procedencia + ", escenario=" + escenario + ", date="
+				+ date + ", estilo=" + estilo + ", componentes=" + componentes + "]";
+	}
+
+	public int getDuracion() {
+		return duracion;
+	}
+
+	private void setDuracion(int duracion) {
+		this.duracion = duracion;
 	}
 
 }

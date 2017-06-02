@@ -4,18 +4,20 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.ListIterator;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Componentes;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Grupo;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.ComponentesVacioException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.ErrorAlEliminarException;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.EscenarioHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaNoValidaException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaPosteriorException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FormatoHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.GrupoNoExisteException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.GrupoYaExisteException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreGrupoNoValidoException;
-import resurrectionFest.funcionalidad.enumeraciones.Dias;
 import resurrectionFest.funcionalidad.enumeraciones.Escenarios;
 import resurrectionFest.funcionalidad.enumeraciones.Estilo;
 import resurrectionFest.funcionalidad.enumeraciones.Procedencia;
@@ -38,15 +40,16 @@ public class Festival implements Serializable {
 	 */
 	private ArrayList<Grupo> grupos = new ArrayList<Grupo>();
 
-	/**
-	 * Fecha de inicio del festival
-	 */
-	private LocalDate fechaInicio = LocalDate.now();
-
-	/**
-	 * Fecha del final del festival
-	 */
-	private LocalDate fechaFinal = LocalDate.now();
+	// /**
+	// * Fecha de inicio del festival
+	// */
+	// private LocalDate fechaInicio = LocalDate.now();
+	//
+	// /**
+	// * Fecha del final del festival
+	// */
+	// private LocalDate fechaFinal = LocalDate.now();
+	private Fecha fecha = new Fecha();
 
 	/**
 	 * Método para añadir grupo
@@ -62,13 +65,18 @@ public class Festival implements Serializable {
 	 * @throws FormatoHoraNoValidoException
 	 * @throws GrupoYaExisteException
 	 * @throws ComponentesVacioException
+	 * @throws EscenarioHoraNoValidoException
 	 */
-	void addGrupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Dias dia, String hora,
-			Componentes componentes) throws NombreGrupoNoValidoException, FormatoHoraNoValidoException,
-					GrupoYaExisteException, ComponentesVacioException {
-		Grupo grupo = new Grupo(estilo, nombre, procedencia, escenario, dia, hora, componentes);
+	void addGrupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Date date,
+			Componentes componentes, int duracion) throws NombreGrupoNoValidoException, FormatoHoraNoValidoException,
+			GrupoYaExisteException, ComponentesVacioException, EscenarioHoraNoValidoException {
+		Grupo grupo = new Grupo(estilo, nombre, procedencia, escenario, date, componentes, duracion);
 		if (grupos.contains(grupo))
 			throw new GrupoYaExisteException("El grupo ya existe");
+		if (!comprobarEscenarioDuracion(grupo))
+			throw new EscenarioHoraNoValidoException(
+					"No puedes introducir un grupo en el mismo escenario que otro grupo que toca en ese tramo horario");
+
 		grupos.add(grupo);
 	}
 
@@ -119,9 +127,9 @@ public class Festival implements Serializable {
 	 * @throws ComponentesVacioException
 	 */
 	void modificarGrupo(String nombreActual, String nuevoNombre, Estilo estilo, Procedencia procedencia,
-			Escenarios escenario, Dias dia, String hora, Componentes componentes)
-					throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
-		Grupo grupo = new Grupo(estilo, nuevoNombre, procedencia, escenario, dia, hora, componentes);
+			Escenarios escenario, Date date, Componentes componentes, int duracion)
+			throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
+		Grupo grupo = new Grupo(estilo, nuevoNombre, procedencia, escenario, date, componentes, duracion);
 		grupos.set(grupos.indexOf(new Grupo(nombreActual)), grupo);
 
 	}
@@ -195,9 +203,7 @@ public class Festival implements Serializable {
 	 * @throws FechaPosteriorException
 	 */
 	void setInicioFestival(int dia, int mes, int anno) throws FechaPosteriorException, FechaNoValidaException {
-		String fecha = "" + anno + "-" + String.format("%02d", mes) + "-" + String.format("%02d", dia);
-		if (Fecha.testFechaInicio(fecha))
-			setFechaInicio(LocalDate.of(anno, mes, dia));
+		fecha.setFechaInicio(dia, mes, anno);
 	}
 
 	/**
@@ -210,9 +216,7 @@ public class Festival implements Serializable {
 	 * @throws FechaPosteriorException
 	 */
 	void setFinalFestival(int dia, int mes, int anno) throws FechaPosteriorException, FechaNoValidaException {
-		String fecha = "" + anno + "-" + String.format("%02d", mes) + "-" + String.format("%02d", dia);
-		if (Fecha.testFechaFinal(fecha, fechaInicio))
-			setFechaFinal(LocalDate.of(anno, mes, dia));
+		fecha.setFechaFinal(dia, mes, anno);
 	}
 
 	/**
@@ -221,30 +225,30 @@ public class Festival implements Serializable {
 	 * @return
 	 */
 	long getDiasRestantes() {
-		return Fecha.getDiasRestantes(getFechaInicio());
+		return fecha.getDiasRestantes();
 	}
 
 	/**
-	 * Devuelve la fecha de inicio en formato castellano en formato cadena
+	 * Get fecha de inicio en cadena
 	 * 
-	 * @return fecha
+	 * @return cadena
 	 */
-	String fechaInicioString() {
-		return Fecha.getFechaEspanola(fechaInicio);
+	String getFechaInicioString() {
+		return fecha.getFechaEspanola(fecha.getFechaInicio());
 	}
 
 	/**
-	 * Devuelve la fecha final del festival en formato castellano en formato
-	 * cadena
+	 * Get fecha de final en cadena
 	 * 
-	 * @return
+	 * @return cadena
 	 */
-	String fechaFinalString() {
-		return Fecha.getFechaEspanola(fechaFinal);
+	String getFechaFinalString() {
+		return fecha.getFechaEspanola(fecha.getFechaFinal());
 	}
 
 	/**
 	 * Crea un arrayList ordenado por coste y devuelve el iterador
+	 * 
 	 * @return iterador
 	 */
 	ListIterator<Grupo> iteradorCoste() {
@@ -255,67 +259,110 @@ public class Festival implements Serializable {
 		Collections.sort(arrayList);
 		return arrayList.listIterator();
 	}
-	
+
 	/**
 	 * ArrayList de grupos filtrados por escenario
+	 * 
 	 * @param escenario
 	 * @return arraylist
 	 */
-	private ArrayList<Grupo> arrayEscenario(Escenarios escenario){
+	private ArrayList<Grupo> arrayEscenario(Escenarios escenario) {
 		ArrayList<Grupo> arrayList = new ArrayList<Grupo>();
 		for (Grupo grupo : grupos) {
-			if(grupo.getEscenario() == escenario)
+			if (grupo.getEscenario() == escenario)
 				arrayList.add(grupo);
 		}
 		return arrayList;
 	}
-	
+
 	/**
 	 * ArrayList de grupos filtrados por dias
+	 * 
 	 * @param escenario
 	 * @return arraylist
 	 */
-	private ArrayList<Grupo> arrayDias(Dias dia){
+	public ListIterator<Grupo> iteratorDias() {
 		ArrayList<Grupo> arrayList = new ArrayList<Grupo>();
 		for (Grupo grupo : grupos) {
-			if(grupo.getDia() == dia)
-				arrayList.add(grupo);
+			arrayList.add(grupo);
 		}
-		return arrayList;
+		Collections.sort(arrayList, new Comparator<Grupo>() {
+			public int compare(Grupo arg0, Grupo arg1) {
+				if (arg0.getDate().after(arg1.getDate()))
+					return 1;
+				else if (arg0.getDate().before(arg1.getDate()))
+					return -1;
+				return 0;
+			}
+
+		});
+		return arrayList.listIterator();
 	}
-	
+
 	/**
 	 * Devuelve el listiterator de grupos por escenario
+	 * 
 	 * @param escenario
 	 * @return listiterador
 	 */
-	ListIterator<Grupo> iteradorEscenarios(Escenarios escenario){
+	ListIterator<Grupo> iteradorEscenarios(Escenarios escenario) {
 		return arrayEscenario(escenario).listIterator();
 	}
-	
+
 	/**
-	 * Devuelve el listiterator de grupos por dias
-	 * @param escenario
-	 * @return listiterador
+	 * Devuelve la fecha de inicio
+	 * 
+	 * @return fecha
 	 */
-	ListIterator<Grupo> iteradorDias(Dias dia){
-		return arrayDias(dia).listIterator();
-	}
-
 	LocalDate getFechaInicio() {
-		return fechaInicio;
+		return fecha.getFechaInicio();
 	}
 
-	private void setFechaInicio(LocalDate fechaInicio) {
-		this.fechaInicio = fechaInicio;
-	}
-
+	/**
+	 * Devuelve la fecha del final
+	 * 
+	 * @return fecha
+	 */
 	LocalDate getFechaFinal() {
-		return fechaFinal;
+		return fecha.getFechaFinal();
 	}
 
-	private void setFechaFinal(LocalDate fechaFinal) {
-		this.fechaFinal = fechaFinal;
+	/**
+	 * Devuelve un array de fechas disponibles
+	 * 
+	 * @return fechas
+	 */
+	LocalDate[] getFechas() {
+		return fecha.getFechas();
+	}
+
+	/**
+	 * Devuelve una array de las fechas disponibles en formato string
+	 * 
+	 * @return array de cadenas
+	 */
+	String[] getFechasString() {
+		return fecha.getFechasString();
+	}
+
+	@SuppressWarnings("deprecation")
+	private boolean comprobarEscenarioDuracion(Grupo grupo) {
+		if (grupos.isEmpty())
+			return true;
+		for (Grupo group : grupos) {
+			Date fecha = (Date) group.getDate().clone();
+			fecha.setMinutes(group.getDate().getMinutes() + group.getDuracion());
+			if (group.getEscenario() == grupo.getEscenario() && 
+					(group.getHora().equals(grupo.getHora())
+					|| (!grupo.getDate().before(group.getDate()) && !grupo.getDate().after(fecha))))
+				return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Festival [grupos=" + grupos + "]";
 	}
 
 }

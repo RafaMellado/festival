@@ -19,20 +19,21 @@ abstract class MostrarFestival extends MostrarGrupo {
 	/**
 	 * Botón anterior del iterador del festival
 	 */
-	protected JButton btnAnterior;
+	JButton btnAnterior;
 	/**
 	 * Botón siguiente del iterador del festival
 	 */
-	protected JButton btnSiguiente;
+	JButton btnSiguiente;
 	/**
 	 * Campo de texto para ver o introducir la posición del grupo en el
 	 * arraylist
 	 */
-	protected JLabel lblPosicion;
+	JLabel lblPosicion;
 	/**
 	 * Muestra el total de grupos del festival
 	 */
-	protected ListIterator<Grupo> itGroups = Gestion.getGruposIterator();
+	ListIterator<Grupo> itGroups = Gestion.getGruposIterator();
+
 	/**
 	 * Create the dialog.
 	 */
@@ -44,7 +45,7 @@ abstract class MostrarFestival extends MostrarGrupo {
 	/**
 	 * Avanza una posición en el iterador de grupos si es posible
 	 */
-	protected void nextGroup() {
+	void nextGroup() {
 		if (itGroups.hasNext()) {
 			group = itGroups.next();
 			if (group.getNombre().equals(lblMostrarGrupoName.getText()) && itGroups.hasNext())
@@ -64,7 +65,7 @@ abstract class MostrarFestival extends MostrarGrupo {
 	/**
 	 * Retrasa una posición en el iterador de grupos si es posible
 	 */
-	protected void previousGroup() {
+	void previousGroup() {
 		if (itGroups.hasPrevious()) {
 			group = itGroups.previous();
 			if (group.getNombre().equals(lblMostrarGrupoName.getText()) && itGroups.hasPrevious())
@@ -103,9 +104,8 @@ abstract class MostrarFestival extends MostrarGrupo {
 			}
 		});
 
+	}
 
-
-	}	
 	/**
 	 * Configura el diálogo
 	 */
@@ -133,7 +133,6 @@ abstract class MostrarFestival extends MostrarGrupo {
 		lblPosicion = new JLabel();
 		lblPosicion.setBounds(188, 161, 24, 20);
 		getContentPane().add(lblPosicion);
-
 
 		nextGroup();
 		btnAnterior.setEnabled(false);

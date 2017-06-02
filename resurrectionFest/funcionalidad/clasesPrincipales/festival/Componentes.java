@@ -90,9 +90,9 @@ public class Componentes implements Serializable {
 	 * @throws NombreMiembroNoValidoException
 	 * @throws MiembroYaExisteException
 	 */
-	public void addBajista(String nombre, Procedencia procedencia, boolean inalambrico, boolean microfoneado)
+	public void addBajista(String nombre, Procedencia procedencia, boolean inalambrico, boolean microfoneado, boolean pedalAtenuador)
 			throws NombreMiembroNoValidoException, MiembroYaExisteException {
-		Bajista bajista = new Bajista(nombre, procedencia, inalambrico, microfoneado);
+		Bajista bajista = new Bajista(nombre, procedencia, inalambrico, microfoneado, pedalAtenuador);
 		comprobarMiembro(bajista);
 		componentes.add(bajista);
 
@@ -122,6 +122,10 @@ public class Componentes implements Serializable {
 		} catch (IndexOutOfBoundsException e) {
 			throw new ErrorAlEliminarException("No se ha podido eliminar");
 		}
+	}
+	
+	public void modificarComponente(String nombre, Procedencia procedencia) throws NombreMiembroNoValidoException{
+		componentes.get(componentes.indexOf(new Cantante(nombre))).modificarNombreProcedencia(nombre, procedencia);
 	}
 
 	/**

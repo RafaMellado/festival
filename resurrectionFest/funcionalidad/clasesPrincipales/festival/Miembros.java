@@ -84,6 +84,10 @@ import resurrectionFest.funcionalidad.enumeraciones.Procedencia;
 		return PATRON_NAME.matcher(nombre).matches();
 	}
 
+	void modificarNombreProcedencia(String nombre, Procedencia procedencia) throws NombreMiembroNoValidoException{
+		setNombre(nombre);
+		setProcedencia(procedencia);
+	}
 	public String getNombre() {
 		return nombre;
 	}

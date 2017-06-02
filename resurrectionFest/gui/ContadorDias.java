@@ -15,6 +15,7 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
 /**
@@ -54,18 +55,14 @@ public class ContadorDias extends JDialog {
 		contentPanel.setBackground(new Color(255, 250, 205));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		//JLabel label = new JLabel(String.valueOf(Gestion.getDiasRestantes())+" DÍAS");
 		contentPanel.setLayout(null);
 		{
-			JLabel lblQuedan = new JLabel("Queda:");
-			lblQuedan.setFont(new Font("Tahoma", Font.PLAIN, 40));
-			lblQuedan.setBounds(118, 0, 184, 95);
+			JLabel lblQuedan = new JLabel(getDuracionFecha());
+			lblQuedan.setFont(new Font("Tahoma", Font.PLAIN, 30));
+			lblQuedan.setBounds(10, 0, 374, 140);
 			contentPanel.add(lblQuedan);
 		}
-		
-		JLabel label = new JLabel(String.valueOf(Gestion.getDiasRestantes())+" DÍAS");
-		label.setFont(new Font("Tahoma", Font.PLAIN, 30));
-		label.setBounds(137, 92, 257, 41);
-		contentPanel.add(label);
 		{
 			JLabel lblFechaInicio = new JLabel("Fecha inicio:");
 			lblFechaInicio.setBounds(10, 167, 102, 14);
@@ -102,5 +99,13 @@ public class ContadorDias extends JDialog {
 				buttonPane.add(cancelButton);
 			}
 		}
+	}
+
+	private String getDuracionFecha(){
+		if(Gestion.getDiasRestantes()<0)
+			return "El festival ya ha concluido";
+		if(Gestion.getFechaInicio().isAfter(LocalDate.now()))
+			return "Quedan: \n"+String.valueOf(Gestion.getDiasRestantes())+" DÍAS";
+		return "El festival está en curso";
 	}
 }

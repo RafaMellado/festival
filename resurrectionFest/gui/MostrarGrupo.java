@@ -12,7 +12,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.border.TitledBorder;
 
-import resurrectionFest.funcionalidad.clasesPrincipales.festival.Festival;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Gestion;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Grupo;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.Miembros;
@@ -42,132 +41,139 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Panel contenedor
 	 */
-	protected JPanel contentPane;
+	JPanel contentPane;
 	/**
 	 * Field para buscar
 	 */
-	protected JTextField fieldBuscar;
+	JTextField fieldBuscar;
 	/**
 	 * Label para mostrar el nombre del grupo
 	 */
-	protected JLabel lblMostrarGrupoName;
+	JLabel lblMostrarGrupoName;
 	/**
 	 * Label para mostrar el escenario
 	 */
-	protected JLabel lblMostrarEscenario;
+	JLabel lblMostrarEscenario;
 	/**
 	 * Label para mostrar la hora de actuación del grupo
 	 */
-	protected JLabel lblMostrarHoraGrupo;
+	JLabel lblMostrarHoraGrupo;
 	/**
 	 * Label para mostrar el estilo del grupo
 	 */
-	protected JLabel lblMostrarEstiloGrupo;
+	JLabel lblMostrarEstiloGrupo;
 	/**
 	 * Label para mostrar el día de actuación del grupo
 	 */
-	protected JLabel lblMostrarDiaGrupo;
+	JLabel lblMostrarDiaGrupo;
 	/**
 	 * Label para mostrar la procedencia del grupo
 	 */
-	protected JLabel lblMostrarProcedenciaGrupo;
+	JLabel lblMostrarProcedenciaGrupo;
 	/**
 	 * Grupo
 	 */
-	protected Grupo group;
+	Grupo group;
 	/**
 	 * Iterador de componentes
 	 */
-	protected ListIterator<Miembros> itComp;
+	ListIterator<Miembros> itComp;
 	/**
 	 * Miembro del grupo
 	 */
-	protected Miembros miembro;
+	Miembros miembro;
 	/**
 	 * Label del nombre del componente
 	 */
-	protected JLabel lblNameComp;
+	JLabel lblNameComp;
 	/**
 	 * Label del instrumento del componente
 	 */
-	protected JLabel lblInstr;
+	JLabel lblInstr;
 	/**
 	 * Label que muestra el coste total del grupo
 	 */
-	protected JLabel lblMostrarCosteTotal;
+	JLabel lblMostrarCosteTotal;
 	/**
 	 * Label del coste del miembro
 	 */
-	protected JLabel lblCosteMiembro;
+	JLabel lblCosteMiembro;
 	/**
 	 * Label que muestra el coste del componente
 	 */
-	protected JLabel lblMostrarCosteComp;
+	JLabel lblMostrarCosteComp;
 	/**
 	 * Label que muestra el nombre del componente
 	 */
-	protected JLabel lblMostrarCompName;
+	JLabel lblMostrarCompName;
 	/**
 	 * Label que muestra el instrumento del miembro
 	 */
-	protected JLabel lblMostrarInstrumento;
-	/**
-	 * Envoltorio de grupos
-	 */
-	protected Festival festival = Gestion.festival;
+	JLabel lblMostrarInstrumento;
 	/**
 	 * Label del nombre del grupo
 	 */
-	protected JLabel lblNombreGrupo;
+	JLabel lblNombreGrupo;
 	/**
 	 * Label del día de actuación
 	 */
-	protected JLabel lblDia;
+	JLabel lblDia;
 	/**
 	 * Label del estilo del grupo
 	 */
-	protected JLabel lblEstilo;
+	JLabel lblEstilo;
 	/**
 	 * Label de la hora de actuación del grupo
 	 */
-	protected JLabel lblHora;
+	JLabel lblHora;
 	/**
 	 * Label de la procedencia del grupo
 	 */
-	protected JLabel lblProcedencia;
+	JLabel lblProcedencia;
 	/**
 	 * Label del escenario del grupo
 	 */
-	protected JLabel lblEscenario;
+	JLabel lblEscenario;
 	/**
 	 * Botón de OK
 	 */
-	protected JButton defaultButton;
+	JButton defaultButton;
 	/**
 	 * Botón de anterior del iterador de componentes
 	 */
-	protected JButton btnCompPrevious;
+	JButton btnCompPrevious;
 	/**
 	 * Botón de siguiente del iterador de componentes
 	 */
-	protected JButton btnCompNext;
+	JButton btnCompNext;
 	/**
 	 * Panel de componentes
 	 */
-	protected JPanel panel;
+	JPanel panel;
 	/**
 	 * Label de buscar
 	 */
-	protected JLabel lblBuscar;
+	JLabel lblBuscar;
 	/**
 	 * Botón buscar
 	 */
-	protected JButton btnBuscar;
+	JButton btnBuscar;
 	/**
 	 * Label del coste del grupo
 	 */
-	private JLabel lblCosteGrupo;
-	protected JButton cancButton;
+	JLabel lblCosteGrupo;
+	/**
+	 * Boton cancelar
+	 */
+	JButton cancButton;
+	/**
+	 * Label mostrar duracion
+	 */
+	JLabel lblMostrarDuracion;
+	/**
+	 * Label titulo duracion
+	 */
+	JLabel lblDuracion;
 
 	/**
 	 * Create the dialog.
@@ -237,15 +243,16 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Renueva los datos en el dialogo
 	 */
-	protected void renovarDatos() {
+	void renovarDatos() {
 		itComp = group.getComponentesIterator();
 		nextComponent();
-		lblMostrarDiaGrupo.setText(group.getDia().toString());
+		lblMostrarDiaGrupo.setText(group.getDia());
 		lblMostrarEscenario.setText(group.getNombreEscenario());
 		lblMostrarEstiloGrupo.setText(group.getEstilo().toString());
 		lblMostrarGrupoName.setText(group.getNombre());
 		lblMostrarHoraGrupo.setText(group.getHora());
 		lblMostrarCosteTotal.setText(group.getCosteGrupo() + "€");
+		lblMostrarDuracion.setText(group.getDuracionString());
 		lblMostrarProcedenciaGrupo.setText(group.getProcedencia().toString());
 		if (lblNameComp == null || miembro == null || lblNameComp.equals(miembro.getNombre()))
 			nextComponent();
@@ -255,7 +262,7 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Avanza una posición en el iterador de componentes
 	 */
-	protected void nextComponent() {
+	void nextComponent() {
 		if (itComp.hasNext()) {
 			miembro = itComp.next();
 			if (miembro.getNombre() == lblMostrarCompName.getText() && itComp.hasNext())
@@ -278,7 +285,7 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Retrasa una posición en el iterador de componentes
 	 */
-	protected void previousComponent() {
+	void previousComponent() {
 		if (itComp.hasPrevious()) {
 			miembro = itComp.previous();
 			if (miembro.getNombre() == lblMostrarCompName.getText() && itComp.hasPrevious())
@@ -301,7 +308,7 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Busca un grupo
 	 */
-	protected void buscar() {
+	void buscar() {
 		try {
 			group = Gestion.buscarGrupo(fieldBuscar.getText());
 			itComp = group.getComponentesIterator();
@@ -316,7 +323,7 @@ abstract class MostrarGrupo extends JDialog {
 	/**
 	 * Limpia los campos
 	 */
-	protected void limpiar() {
+	void limpiar() {
 		lblMostrarDiaGrupo.setText("");
 		lblMostrarEscenario.setText("");
 		lblMostrarEstiloGrupo.setText("");
@@ -324,6 +331,7 @@ abstract class MostrarGrupo extends JDialog {
 		lblMostrarHoraGrupo.setText("");
 		lblMostrarProcedenciaGrupo.setText("");
 		lblMostrarCosteTotal.setText("");
+		lblMostrarDuracion.setText("");
 		btnCompPrevious.setEnabled(false);
 		btnCompNext.setEnabled(false);
 		itComp = null;
@@ -332,8 +340,6 @@ abstract class MostrarGrupo extends JDialog {
 		lblMostrarCosteComp.setText("");
 		fieldBuscar.setText("");
 	}
-	
-	
 
 	/**
 	 * Configura el diálogo
@@ -381,7 +387,7 @@ abstract class MostrarGrupo extends JDialog {
 		contentPane.add(lblEscenario);
 
 		lblMostrarDiaGrupo = new JLabel();
-		lblMostrarDiaGrupo.setBounds(75, 81, 121, 14);
+		lblMostrarDiaGrupo.setBounds(57, 81, 162, 14);
 		contentPane.add(lblMostrarDiaGrupo);
 
 		lblMostrarEstiloGrupo = new JLabel();
@@ -404,7 +410,7 @@ abstract class MostrarGrupo extends JDialog {
 		panel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null), "Componentes",
 				TitledBorder.CENTER, TitledBorder.TOP, null, new Color(0, 0, 0)));
 		panel.setBackground(new Color(100, 149, 237));
-		panel.setBounds(27, 183, 382, 140);
+		panel.setBounds(27, 197, 382, 140);
 		contentPane.add(panel);
 		panel.setLayout(null);
 
@@ -469,5 +475,13 @@ abstract class MostrarGrupo extends JDialog {
 		cancButton = new JButton("Salir");
 		cancButton.setBounds(330, 348, 89, 23);
 		contentPane.add(cancButton);
+		
+		lblDuracion = new JLabel("Duracion:");
+		lblDuracion.setBounds(27, 172, 89, 14);
+		contentPane.add(lblDuracion);
+		
+		lblMostrarDuracion = new JLabel("");
+		lblMostrarDuracion.setBounds(93, 172, 77, 14);
+		contentPane.add(lblMostrarDuracion);
 	}
 }

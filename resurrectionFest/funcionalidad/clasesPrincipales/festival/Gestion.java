@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.ListIterator;
 
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.ComponentesVacioException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.ErrorAlEliminarException;
+import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.EscenarioHoraNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaNoValidaException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FechaPosteriorException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.FormatoHoraNoValidoException;
@@ -16,7 +18,6 @@ import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.Gru
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.MiembroYaExisteException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreGrupoNoValidoException;
 import resurrectionFest.funcionalidad.clasesPrincipales.festival.excepciones.NombreMiembroNoValidoException;
-import resurrectionFest.funcionalidad.enumeraciones.Dias;
 import resurrectionFest.funcionalidad.enumeraciones.Escenarios;
 import resurrectionFest.funcionalidad.enumeraciones.Estilo;
 import resurrectionFest.funcionalidad.enumeraciones.Procedencia;
@@ -48,6 +49,14 @@ public class Gestion {
 	 * Componentes del grupo actual
 	 */
 	public static Componentes componentes = new Componentes();
+
+	public static LocalDate[] getFechas() {
+		return festival.getFechas();
+	}
+
+	public static String[] getFechasString() {
+		return festival.getFechasString();
+	}
 
 	/**
 	 * Abre un fichero nuevo
@@ -92,11 +101,12 @@ public class Gestion {
 	 * @throws FormatoHoraNoValidoException
 	 * @throws GrupoYaExisteException
 	 * @throws ComponentesVacioException
+	 * @throws EscenarioHoraNoValidoException 
 	 */
-	public static void addGrupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Dias dia,
-			String hora, Componentes componentes) throws NombreGrupoNoValidoException, FormatoHoraNoValidoException,
-					GrupoYaExisteException, ComponentesVacioException {
-		festival.addGrupo(estilo, nombre, procedencia, escenario, dia, hora, componentes);
+	public static void addGrupo(Estilo estilo, String nombre, Procedencia procedencia, Escenarios escenario, Date date,
+			Componentes componentes, int duracion) throws NombreGrupoNoValidoException, FormatoHoraNoValidoException,
+			GrupoYaExisteException, ComponentesVacioException, EscenarioHoraNoValidoException {
+		festival.addGrupo(estilo, nombre, procedencia, escenario, date, componentes, duracion);
 		setModificado(true);
 	}
 
@@ -156,9 +166,9 @@ public class Gestion {
 	 * @throws NombreMiembroNoValidoException
 	 * @throws MiembroYaExisteException
 	 */
-	public static void addBajista(String nombre, Procedencia procedencia, boolean inalambrico, boolean microfoneado)
-			throws NombreMiembroNoValidoException, MiembroYaExisteException {
-		componentes.addBajista(nombre, procedencia, inalambrico, microfoneado);
+	public static void addBajista(String nombre, Procedencia procedencia, boolean inalambrico, boolean microfoneado,
+			boolean pedalAtenuador) throws NombreMiembroNoValidoException, MiembroYaExisteException {
+		componentes.addBajista(nombre, procedencia, inalambrico, microfoneado, pedalAtenuador);
 	}
 
 	/**
@@ -201,9 +211,9 @@ public class Gestion {
 	 * @throws ComponentesVacioException
 	 */
 	public static void modificarGrupo(String nombreActual, String nuevoNombre, Estilo estilo, Procedencia procedencia,
-			Escenarios escenario, Dias dia, String hora, Componentes componentes)
-					throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
-		festival.modificarGrupo(nombreActual, nuevoNombre, estilo, procedencia, escenario, dia, hora, componentes);
+			Escenarios escenario, Date date, Componentes componentes, int duracion)
+			throws NombreGrupoNoValidoException, FormatoHoraNoValidoException, ComponentesVacioException {
+		festival.modificarGrupo(nombreActual, nuevoNombre, estilo, procedencia, escenario, date, componentes, duracion);
 		setModificado(true);
 	}
 
@@ -286,6 +296,16 @@ public class Gestion {
 	}
 
 	/**
+	 * Convierte la fecha localdate y la hora en una fecha Date
+	 * @param fecha
+	 * @param hora
+	 * @return Date
+	 * @throws FormatoHoraNoValidoException
+	 */
+	public static Date getFechaGrupo(LocalDate fecha, String hora) throws FormatoHoraNoValidoException{
+		return Fecha.localDateHourToDate(fecha, hora);
+	}
+	/**
 	 * Devuelve los días restantes del festival para que empiece
 	 * 
 	 * @return long
@@ -300,7 +320,7 @@ public class Gestion {
 	 * @return fecha inicio
 	 */
 	public static String getFechaInicioString() {
-		return festival.fechaInicioString();
+		return festival.getFechaInicioString();
 	}
 
 	/**
@@ -309,7 +329,7 @@ public class Gestion {
 	 * @return fecha final
 	 */
 	public static String getFechaFinalString() {
-		return festival.fechaFinalString();
+		return festival.getFechaFinalString();
 	}
 
 	/**
@@ -335,8 +355,8 @@ public class Gestion {
 	 * 
 	 * @return listiterator
 	 */
-	public static ListIterator<Grupo> iteradorDias(Dias dia) {
-		return festival.iteradorDias(dia);
+	public static ListIterator<Grupo> iteradorDias() {
+		return festival.iteratorDias();
 	}
 
 	public static LocalDate getFechaInicio() {
