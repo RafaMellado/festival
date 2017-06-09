@@ -5,7 +5,7 @@ import resurrectionFest.funcionalidad.clasesPrincipales.festival.Gestion;
 /**
  * Clase para mostrar por coste
  * 
- * @author Rafael Mellado Jiménez
+ * @author Rafael Mellado JimÃ©nez
  * @version 1.0
  */
 public class MostrarPorCoste extends MostrarFestival {
@@ -21,7 +21,8 @@ public class MostrarPorCoste extends MostrarFestival {
 	public MostrarPorCoste() {
 		setTitle("Mostrar ordenado por coste");
 		itGroups = Gestion.iteratorCoste();
-	renovarDatos();
+		nextGroup();
+		renovarDatos();
 		btnAnterior.setEnabled(false);
 	}
 
