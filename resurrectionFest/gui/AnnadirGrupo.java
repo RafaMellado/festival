@@ -204,6 +204,7 @@ public class AnnadirGrupo extends JDialog {
 	 * Create the Dialog.
 	 */
 	public AnnadirGrupo() {
+		setModal(true);
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit()
 				.getImage(AnnadirGrupo.class.getResource("/resurrectionFest/imagenes/logo.png")));

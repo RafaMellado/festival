@@ -39,16 +39,9 @@ public class Festival implements Serializable {
 	 * ArrayList de grupos
 	 */
 	private ArrayList<Grupo> grupos = new ArrayList<Grupo>();
-
-	// /**
-	// * Fecha de inicio del festival
-	// */
-	// private LocalDate fechaInicio = LocalDate.now();
-	//
-	// /**
-	// * Fecha del final del festival
-	// */
-	// private LocalDate fechaFinal = LocalDate.now();
+	/**
+	 * Fecha del festival
+	 */
 	private Fecha fecha = new Fecha();
 
 	/**
@@ -345,6 +338,11 @@ public class Festival implements Serializable {
 		return fecha.getFechasString();
 	}
 
+	/**
+	 * Comprueba si hay un grupo tocando en el mismo escenario a la misma hora y en el mismo dia
+	 * @param grupo
+	 * @return boolean
+	 */
 	@SuppressWarnings("deprecation")
 	private boolean comprobarEscenarioDuracion(Grupo grupo) {
 		if (grupos.isEmpty())
@@ -352,9 +350,9 @@ public class Festival implements Serializable {
 		for (Grupo group : grupos) {
 			Date fecha = (Date) group.getDate().clone();
 			fecha.setMinutes(group.getDate().getMinutes() + group.getDuracion());
-			if (group.getEscenario() == grupo.getEscenario() && 
-					(group.getHora().equals(grupo.getHora())
-					|| (!grupo.getDate().before(group.getDate()) && !grupo.getDate().after(fecha))))
+			if (group.getDia() == grupo.getDia() && group.getEscenario() == grupo.getEscenario()
+					&& (group.getHora().equals(grupo.getHora())
+							|| (!grupo.getDate().before(group.getDate()) && !grupo.getDate().after(fecha))))
 				return false;
 		}
 		return true;

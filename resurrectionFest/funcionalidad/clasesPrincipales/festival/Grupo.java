@@ -144,10 +144,6 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 			throw new NumeroComponentesNoValidoException("El número de componentes no puede ser menor a 1");
 		componentes.removeComponente(nombre);
 	}
-	
-	public void modificarComponente(String nombre, Procedencia procedencia) throws NombreMiembroNoValidoException{
-		componentes.modificarComponente(nombre, procedencia);
-	}
 
 	/**
 	 * Devuelve el listIterator de los componentes
@@ -215,6 +211,10 @@ public class Grupo implements Serializable, Comparable<Grupo> {
 		return String.format("%02d", getDate().getHours()) + ":" + String.format("%02d", getDate().getMinutes());
 	}
 
+	/**
+	 * Devuelve la duración en formato cadena
+	 * @return duración
+	 */
 	public String getDuracionString() {
 		if (getDuracion() < 60)
 			return getDuracion() + " minutos";

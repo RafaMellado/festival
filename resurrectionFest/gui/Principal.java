@@ -154,6 +154,10 @@ public class Principal extends JFrame {
 	 * Opcion del menu festival para mostrar por días
 	 */
 	private JMenuItem mntmPorDias;
+	/**
+	 * Menu del festival
+	 */
+	private JMenu mnFestival;
 
 	/**
 	 * Launch the application.
@@ -410,6 +414,9 @@ public class Principal extends JFrame {
 				try {
 					Gestion.abrir(fileChooser.getSelectedFile().getAbsolutePath());
 					setTitle(Gestion.getNombre());
+					ContadorDias contador = new ContadorDias();
+					contador.setLocationRelativeTo(null);
+					contador.setVisible(true);
 				} catch (ClassNotFoundException e) {
 					JOptionPane.showMessageDialog(null, "El fichero no es un festival", "Error",
 							JOptionPane.INFORMATION_MESSAGE);
@@ -585,7 +592,7 @@ public class Principal extends JFrame {
 		mntmBuscar.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK));
 		mnGrupo.add(mntmBuscar);
 
-		JMenu mnFestival = new JMenu("Festival");
+		mnFestival = new JMenu("Festival");
 		mnFestival.setMnemonic('F');
 		mnFestival.setForeground(new Color(255, 255, 255));
 		mnFestival.setBackground(new Color(128, 0, 0));
@@ -635,9 +642,9 @@ public class Principal extends JFrame {
 		mntmAcercaDe.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
 		mnAcercaDe.add(mntmAcercaDe);
 
-		JLabel label = new JLabel("");
-		label.setIcon(new ImageIcon(Principal.class.getResource("/resurrectionFest/imagenes/portadaAdmin.jpg")));
-		label.setBounds(0, 21, 442, 252);
-		contentPane.add(label);
+		JLabel imagen = new JLabel("");
+		imagen.setIcon(new ImageIcon(Principal.class.getResource("/resurrectionFest/imagenes/portadaAdmin.jpg")));
+		imagen.setBounds(0, 21, 442, 252);
+		contentPane.add(imagen);
 	}
 }
